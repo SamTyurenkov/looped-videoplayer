@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+<style>
+    html, body {
+        margin: 0;
+        max-width: 100%;
+        max-height: 100vh;
+    }
+    video {
+        max-width: 100%;
+    }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+    }
+    .overlay input {
+        visibility: hidden;
+    }
+</style>
+</head>
+<body>
+<video id="videoPlayer" width="100%" controls autoplay loop>
+    <source src="" type="video/mp4">
+</video>
+<label class="overlay" for="videoInput">
+  <input type="file" id="videoInput" accept="video/*">
+</label>
+<script>
+    // script.js
+
+// Select the video player and file input elements
+const videoPlayer = document.getElementById('videoPlayer');
+const videoInput = document.getElementById('videoInput');
+const selectedVideoName = document.getElementById('selectedVideoName');
+
+// Listen for changes in the file input
+videoInput.addEventListener('change', function (event) {
+  const file = event.target.files[0]; // Get the selected file
+
+  if (file) {
+    // Check if the file is a video
+    if (file.type.startsWith('video/')) {
+      // Create a URL for the selected file
+      const videoURL = URL.createObjectURL(file);
+
+      // Update the video player's source
+      videoPlayer.src = videoURL;
+
+      // Load and play the video
+      videoPlayer.load();
+      videoPlayer.play();
+
+      // Optionally, display the selected video's name
+      selectedVideoName.textContent = `Selected Video: ${file.name}`;
+    } else {
+      alert('Please select a valid video file.');
+    }
+  }
+});
+</script>
+</body>
+</html>
