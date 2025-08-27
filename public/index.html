@@ -3,11 +3,51 @@
 <style>
     html, body {
         margin: 0;
+        padding: 0;
         max-width: 100%;
         max-height: 100vh;
+        overflow: hidden;
+        background: #000;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        -webkit-will-change: transform;
+        -moz-transform: translateZ(0);
+        -moz-backface-visibility: hidden;
+        -moz-perspective: 1000px;
+        -moz-will-change: transform;
+        -ms-transform: translateZ(0);
+        -ms-backface-visibility: hidden;
+        -ms-perspective: 1000px;
+        -ms-will-change: transform;
+        height: 100vh;
     }
     video {
         max-width: 100%;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        perspective: 1000px;
+        will-change: transform;
+        -webkit-transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        -webkit-will-change: transform;
+        -moz-transform: translateZ(0);
+        -moz-backface-visibility: hidden;
+        -moz-perspective: 1000px;
+        -moz-will-change: transform;
+        -ms-transform: translateZ(0);
+        -ms-backface-visibility: hidden;
+        -ms-perspective: 1000px;
+        -ms-will-change: transform;
+        contain: layout style paint;
+        -webkit-contain: layout style paint;
+        -moz-contain: layout style paint;
+        -ms-contain: layout style paint;
     }
     .overlay {
         position: fixed;
@@ -22,19 +62,103 @@
 </style>
 </head>
 <body>
-<video id="videoPlayer" width="100%" controls autoplay loop>
+<video id="videoPlayer" 
+       width="100%" 
+       height="100%"
+       controls 
+       autoplay 
+       loop 
+       preload="auto"
+       muted
+       playsinline
+       webkit-playsinline
+       x-webkit-airplay="allow"
+       x5-video-player-type="h5"
+       x5-video-player-fullscreen="true"
+       x5-video-orientation="landscape"
+       disablePictureInPicture
+       disableRemotePlayback
+       style="background: #000;">
     <source src="" type="video/mp4">
 </video>
 <label class="overlay" for="videoInput">
   <input type="file" id="videoInput" accept="video/*">
 </label>
 <script>
-    // script.js
+    // Optimized video player script
 
 // Select the video player and file input elements
 const videoPlayer = document.getElementById('videoPlayer');
 const videoInput = document.getElementById('videoInput');
 const selectedVideoName = document.getElementById('selectedVideoName');
+
+// Performance optimizations
+videoPlayer.style.transform = 'translateZ(0)';
+videoPlayer.style.backfaceVisibility = 'hidden';
+videoPlayer.style.perspective = '1000px';
+videoPlayer.style.willChange = 'transform';
+
+// Additional performance optimizations
+videoPlayer.style.imageRendering = 'crisp-edges';
+videoPlayer.style.contain = 'layout style paint';
+
+// Set video properties for maximum performance
+videoPlayer.crossOrigin = 'anonymous';
+videoPlayer.preload = 'auto';
+videoPlayer.autobuffer = true;
+
+// Enable hardware acceleration
+if (videoPlayer.webkitSupportsPresentationMode && typeof videoPlayer.webkitSetPresentationMode === 'function') {
+    videoPlayer.webkitSetPresentationMode('inline');
+}
+
+// Optimize for seamless looping
+videoPlayer.addEventListener('loadedmetadata', function() {
+    videoPlayer.playbackRate = 1.0;
+    videoPlayer.defaultPlaybackRate = 1.0;
+});
+
+// Handle seamless loop transitions
+videoPlayer.addEventListener('ended', function() {
+    videoPlayer.currentTime = 0;
+    videoPlayer.play().catch(e => console.log('Auto-play prevented'));
+});
+
+// Optimize buffering for seamless playback
+videoPlayer.addEventListener('progress', function() {
+    if (videoPlayer.buffered.length > 0) {
+        const bufferedEnd = videoPlayer.buffered.end(videoPlayer.buffered.length - 1);
+        if (bufferedEnd > videoPlayer.duration - 0.5) {
+            // Video is fully buffered, optimize for playback
+            videoPlayer.preload = 'metadata';
+        }
+    }
+});
+
+// Optimize for high frame rate displays
+if (window.matchMedia && window.matchMedia('(min-resolution: 2dppx)').matches) {
+    videoPlayer.style.imageRendering = 'crisp-edges';
+}
+
+// Request animation frame for smooth rendering
+let animationId;
+function optimizeRendering() {
+    // Force GPU layer creation
+    videoPlayer.style.transform = 'translateZ(0)';
+    animationId = requestAnimationFrame(optimizeRendering);
+}
+
+videoPlayer.addEventListener('play', function() {
+    optimizeRendering();
+});
+
+videoPlayer.addEventListener('pause', function() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+    }
+});
+
+
 
 // Listen for changes in the file input
 videoInput.addEventListener('change', function (event) {
@@ -43,18 +167,31 @@ videoInput.addEventListener('change', function (event) {
   if (file) {
     // Check if the file is a video
     if (file.type.startsWith('video/')) {
+      // Clean up previous video URL to prevent memory leaks
+      if (videoPlayer.src && videoPlayer.src.startsWith('blob:')) {
+        URL.revokeObjectURL(videoPlayer.src);
+      }
+
       // Create a URL for the selected file
       const videoURL = URL.createObjectURL(file);
 
       // Update the video player's source
       videoPlayer.src = videoURL;
 
-      // Load and play the video
+      // Load and play the video with performance optimizations
       videoPlayer.load();
-      videoPlayer.play();
+      
+      // Ensure video starts playing with optimal settings
+      videoPlayer.play().then(() => {
+        // Force hardware acceleration after play starts
+        videoPlayer.style.transform = 'translateZ(0)';
+        videoPlayer.style.willChange = 'transform';
+      }).catch(e => console.log('Auto-play prevented:', e));
 
       // Optionally, display the selected video's name
-      selectedVideoName.textContent = `Selected Video: ${file.name}`;
+      if (selectedVideoName) {
+        selectedVideoName.textContent = `Selected Video: ${file.name}`;
+      }
     } else {
       alert('Please select a valid video file.');
     }
